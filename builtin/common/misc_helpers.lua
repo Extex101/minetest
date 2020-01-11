@@ -428,10 +428,9 @@ if INIT == "game" then
 	core.rotate_node = function(itemstack, placer, pointed_thing)
 		local name = placer and placer:get_player_name() or ""
 		local invert_wall = placer and placer:get_player_control().sneak or false
-		core.rotate_and_place(itemstack, placer, pointed_thing,
+		return core.rotate_and_place(itemstack, placer, pointed_thing,
 				is_creative(name),
 				{invert_wall = invert_wall}, true)
-		return itemstack
 	end
 end
 
@@ -573,6 +572,15 @@ function table.insert_all(t, other)
 		t[#t + 1] = other[i]
 	end
 	return t
+end
+
+
+function table.key_value_swap(t)
+	local ti = {}
+	for k,v in pairs(t) do
+		ti[v] = k
+	end
+	return ti
 end
 
 

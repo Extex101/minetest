@@ -523,13 +523,22 @@ void Client::handleCommand_Movement(NetworkPacket* pkt)
 	player->movement_gravity                = g * BS;
 }
 
-void Client::handleCommand_HP(NetworkPacket* pkt)
+void Client::handleCommand_Fov(NetworkPacket *pkt)
 {
+	f32 fov;
+	bool is_multiplier;
+	*pkt >> fov >> is_multiplier;
 
+	LocalPlayer *player = m_env.getLocalPlayer();
+	player->setFov({ fov, is_multiplier });
+}
+
+void Client::handleCommand_HP(NetworkPacket *pkt)
+{
 	LocalPlayer *player = m_env.getLocalPlayer();
 	assert(player != NULL);
 
-	u16 oldhp   = player->hp;
+	u16 oldhp = player->hp;
 
 	u16 hp;
 	*pkt >> hp;
@@ -1072,6 +1081,7 @@ void Client::handleCommand_HudAdd(NetworkPacket* pkt)
 	v2f offset;
 	v3f world_pos;
 	v2s32 size;
+	s16 z_index = 0;
 
 	*pkt >> server_id >> type >> pos >> name >> scale >> text >> number >> item
 		>> dir >> align >> offset;
@@ -1083,6 +1093,11 @@ void Client::handleCommand_HudAdd(NetworkPacket* pkt)
 	try {
 		*pkt >> size;
 	} catch(SerializationError &e) {};
+
+	try {
+		*pkt >> z_index;
+	}
+	catch(PacketError &e) {}
 
 	ClientEvent *event = new ClientEvent();
 	event->type             = CE_HUDADD;
@@ -1099,6 +1114,7 @@ void Client::handleCommand_HudAdd(NetworkPacket* pkt)
 	event->hudadd.offset    = new v2f(offset);
 	event->hudadd.world_pos = new v3f(world_pos);
 	event->hudadd.size      = new v2s32(size);
+	event->hudadd.z_index   = z_index;
 	m_client_event_queue.push(event);
 }
 
